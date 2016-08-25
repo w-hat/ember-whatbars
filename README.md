@@ -28,7 +28,8 @@ than we want.  We can use plugins to add some functionality. For example,
 provides a syntax for videos from popular sites.  Integrating a `markdown-it`
 plugin with Ember (Data) may prove to be difficult, though.
 
-If we trust our user content, we could run the Ember HTMLBars template compiler 
+If we trust our user content, we could run the
+[HTMLBars](https://github.com/tildeio/htmlbars) template compiler 
 on the client side:
 
 ```js
@@ -36,12 +37,12 @@ import Ember from 'ember';
 
 export default Ember.Component.extend({
   layout: Ember.computed('template', function () {
-    return Ember.Handlebars.compile(this.get('template'));
+    return Ember.HTMLBars.compile(this.get('template'));
   }),
 });
 ```
 
-However, this requires adding about a full megabyte (~200k gzipped) to our
+However, this requires adding approximately a megabyte (~200k gzipped) to our
 application's size by including `ember-template-compiler.js` in
 `ember-cli-build.js`:
 
@@ -52,7 +53,8 @@ application's size by including `ember-template-compiler.js` in
 Plus, that method does not allow the templates to change after rendering them.
 
 WhatBars allows untrusted content to use a subset of HTMLBars syntax to
-include whitelisted Ember components.
+include whitelisted Ember components without requiring
+`ember-template-compiler.js`.
 
 
 ## Usage
@@ -75,7 +77,7 @@ export default Ember.Component.extend({
   whitelist:  ['youtube-video', 'jazz-hands-component'],
   
   content: Ember.computed('userContribution', function() {
-    let html = makeShinyAndSafe(this.get('userContribution'));
+    const html = makeShinyAndSafe(this.get('userContribution'));
     return Ember.String.htmlSafe(html);
   }),
 });
@@ -93,7 +95,7 @@ If that is too wordy for you, use the positional parameters:
 {{what-bars content whitelist class='user-content'}}
 ```
 
-The `makeShinyAndSafe` function could be somethin:
+The `makeShinyAndSafe` function could be something like:
 
 ```js
 import markdownit from 'markdown-it';
@@ -123,8 +125,7 @@ And the corresponding template might be:
 
 ### Other Details
 
-If you know the content will never change, you may prefer the
-`what-bars-static` component:
+If the content will not change, you may prefer the `what-bars-static` component:
 
 ```hbs
 {{#if content}}
@@ -138,8 +139,8 @@ If you want to tinker with the `compile` function itself, it is available too:
 import Ember from 'ember';
 import compile from 'ember-whatbars/utils/compile';
 
-const content = "<p>{{weather-component 'Michigan'}}</p>" +
-                "<p>{{carousel-component}}</p>";
+const content = Ember.String.htmlSafe("<p>{{weather-component 'MI'}}</p>" +
+                                      "<p>{{carousel-component}}</p>");
 const whitelist = ['weather-component', 'carousel-component'];
 
 export default Ember.Component.extend({
@@ -147,8 +148,8 @@ export default Ember.Component.extend({
 });
 ```
 
-Currently, WhatBars will only render **inline** components whose `{{tag}}`
-makes up the  entire body of an HTML tag in the `Ember.SafeString` content.
+Currently, WhatBars will only render inline components whose `{{tag}}`
+makes up the entire innerHTML of a `<tag>` in the `Ember.SafeString` content.
 Also, the arguments to a component may only contain a limited set of
 characters (matching `/[\w\d\_\-]+/`).
 
