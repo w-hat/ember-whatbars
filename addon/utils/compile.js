@@ -44,10 +44,10 @@ export default function compile(content, whitelist) {
 	      const loc = ["loc",[null,[0,1],[0,1]]];
         let statement = ["inline", component, positional_args, named_args, loc];
         statements.push(statement);
-        //console.log('statements:', JSON.stringify(statements));
         morph_ixs.push(i);
       }
     }
+    //console.log('statements:', JSON.stringify(statements));
     return el0;
   }
   

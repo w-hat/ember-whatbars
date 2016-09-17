@@ -11,7 +11,7 @@ test('it should return null when the input is null', function(assert) {
 
 test('it should return a blank document fragment', function(assert) {
   const result = compile('<!-- not much here -->', []);
-  assert.ok(Number.isInteger(result.arity));
+  assert.equal(result.arity, 0);
   assert.equal(typeof result.meta, 'object');
   assert.equal(result.raw.isEmpty, false);
   assert.equal(typeof result.raw.buildFragment, 'function');

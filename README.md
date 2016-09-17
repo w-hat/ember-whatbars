@@ -1,8 +1,8 @@
 # Ember-whatbars
 
-This addon compiles templates into document fragments compatible with HTMLBars.
-The primary use case is to provide an Ember-enabled markup language to
-untrusted users.
+This addon compiles templates into document fragments compatible with HTMLBars
+(Glimmer 1).  The primary use case is to provide an Ember-enabled markup
+language to untrusted users.
 
 ## TL;DR Example
 
@@ -161,7 +161,8 @@ the burden of remembering to declare non-public properties as `readOnly()`.
 
 ## Installation
 
-* `git clone` this repository
+* `git clone https://github.com/w-hat/ember-whatbars`
+* `cd ember-whatbars`
 * `npm install`
 * `bower install`
 
