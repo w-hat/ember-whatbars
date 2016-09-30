@@ -3,6 +3,7 @@
 const whatbars_re = /^\{\{([a-z\-]+)([\w\d\-\_\"\'\s\=]*)\}\}$/;
 const argument_re = /([\w\d\-\_]+)(?:=[\'\"]?([\w\d\-\_]+)[\'\"]?)?/g;
 
+// TODO Rewrite at a higher level for Glimmer 2.
 // TODO Support quoted whitespace.
 // TODO Support blocks.
 // TODO Gracefully handle conflicting positional and named paramaters.
@@ -33,16 +34,16 @@ export default function compile(content, whitelist) {
       const component = m && m[1];
       if (whitelist.includes(component)) {
         let named_args = [];   
-        let positional_args = [];     
+        let pos_args = [];
         for (let argsm; argsm = argument_re.exec(m[2]); ) {
 		      if (argsm[2]) {
 		        named_args.push(argsm[1], argsm[2]);
 		      } else {
-		        positional_args.push(argsm[1]);
+		        pos_args.push(argsm[1]);
 		      }
 	      }
 	      const loc = ["loc",[null,[0,1],[0,1]]];
-        let statement = ["inline", component, positional_args, named_args, loc];
+        let statement = ["inline", component, pos_args, named_args, loc, 0, 0];
         statements.push(statement);
         morph_ixs.push(i);
       }
@@ -53,7 +54,7 @@ export default function compile(content, whitelist) {
   
   function buildRenderNodes(dom, fragment) { //, contextualElement
     var morphs = new Array(morph_ixs.length);
-    for (var i in morph_ixs) {
+    for (var i = 0; i < morph_ixs.length; i++) {
       morphs[i] = dom.createMorphAt(dom.childAt(fragment, [morph_ixs[i]]), 0);
     }
     return morphs;
@@ -61,16 +62,13 @@ export default function compile(content, whitelist) {
   
   let template = {
     "meta": {
-      "fragmentReason": {
-        "name": "missing-wrapper",
-        "problems": ["wrong-type", "multiple-nodes"],
-      },
-      "revision": "WhatBars@0.0.0",
+      "revision": "WhatBars@0.0.2",
       "loc": {
         "source": null,
         "start": { "line": 1, "column": 0 },
         "end":   { "line": 1, "column": 0 }
-      }
+      },
+      "moduleName": null,
     },
     "isEmpty": false,
     "arity": 0,
@@ -80,10 +78,8 @@ export default function compile(content, whitelist) {
     "templates": [],
     buildFragment,
     buildRenderNodes,
-    statements,
+    statements
   };
   
-  // Wrap the content to make Ember content.
   return { meta: template.meta, arity: template.arity, raw: template };
-           // render: ?
 }
