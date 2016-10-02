@@ -1,15 +1,27 @@
 # Ember-whatbars
 
-This addon compiles templates into document fragments compatible with HTMLBars
-(Glimmer 1).  The primary use case is to provide an Ember-enabled markup
-language to untrusted users.
+This addon renders Ember components embedded in mutable text content with an
+HTMLBars-like syntax.  The primary use case is to provide an Ember-enabled
+markup language to untrusted users.
 
 ## TL;DR Example
 
-WhatBars allows rendering mutable content that includes Ember components:
+Suppose that `userProvidedContent` is
+
+```md
+Donald Trump and raccoons both
+ * have small hands and
+ * look like thieves.
+
+{{youtube-video v='bQueaSlvjCw'}}
+
+Do not vote for him because he is an embarrassment.
+```
+
+WhatBars allows safely rendering this content along with the Ember component:
 
 ```hbs
-{{what-bars safeHTMLBarsContent whitelistOfComponentNames}}
+{{what-bars userProvidedContent enabledComponents sanitizerSuchAsMarkdownIt}}
 ```
 
 ## Motivation
@@ -52,17 +64,20 @@ application's size by including `ember-template-compiler.js` in
 
 Plus, that method does not allow the templates to change after rendering them.
 
-WhatBars allows untrusted content to use a subset of HTMLBars syntax to
-include whitelisted Ember components without requiring
-`ember-template-compiler.js`.
+WhatBars allows untrusted content to use HTMLBars-like syntax to include
+Ember components without requiring `ember-template-compiler.js`.
 
 
 ## Usage
 
-WhatBars provides a `what-bars` component which uses the provided content as
-its layout.  The layout will rerender when the content is changed.  The
-content must be an `Ember.SafeString` and the whitelist of allowable
-components must be explicitely provided for any subcomponents to be rendered.
+The `what-bars` component renders the enabled components that are embeded in
+the  provided content and runs the provided sanitizer on the rest of the
+content.  Only components that are explicitly enabled will be rendered,
+and the sanitizer function must return an `Ember.SafeString`.
+
+```hbs
+{{what-bars content enabled sanitizer}}
+```
 
 ### Basic Example
 
@@ -74,25 +89,26 @@ import makeShinyAndSafe from 'whatever-you-want-to-use';
 
 export default Ember.Component.extend({
   classNames: ['user-contribution'],
-  whitelist:  ['youtube-video', 'jazz-hands-component'],
-  
-  content: Ember.computed('userContribution', function() {
-    const html = makeShinyAndSafe(this.get('userContribution'));
+  enabled:  ['youtube-video', 'jazz-hands-component'],
+  content: "",
+  sanitizer(contentFragment) {
+    const html = makeShinyAndSafe(contentFragment);
     return Ember.String.htmlSafe(html);
-  }),
+  }
 });
 ```
 
 Then simply use `what-bars` in the user-contribution template:
 
 ```hbs
-{{what-bars content=content whitelist=whitelist class='user-content'}}
+{{what-bars content enabled sanitizer class='user-content'}}
 ```
 
-If that is too wordy for you, use the positional parameters:
+Note that `enabled` may be an array of component names, or an object with
+component names as keys:
 
-```hbs
-{{what-bars content whitelist class='user-content'}}
+```js
+  enabled: {'youtube-video': true, 'jazz-hands-component': true},
 ```
 
 The `makeShinyAndSafe` function could be something like:
@@ -106,6 +122,10 @@ function makeShinyAndSafe(str) {
 }
 ```
 
+The named arguments are provided to the component as `params` and the
+positional arguments are provided as `positional`.
+(This could change when Ember gets
+[splat](https://github.com/wycats/handlebars.js/pull/1149).)
 A possible implementation of the `youtube-video` component is:
 
 ```js
@@ -113,8 +133,12 @@ import Ember from 'ember';
 
 export default Ember.Component.extend({
   classNames: ['youtube-video'],
-  v: "",
-}).reopenClass({ positionalParams: ['v'] });
+  params: {},
+  positional: [],
+  v: Ember.computed('params', 'positional', function() {
+    return this.get('params').v || this.get('positional')[0];
+  }),
+});
 ```
 
 And the corresponding template might be:
@@ -125,39 +149,15 @@ And the corresponding template might be:
 
 ### Other Details
 
-If the content will not change, you may prefer the `what-bars-static` component:
+Currently, the arguments to a component may only contain a limited set of
+characters (matching `/[\w\d\_\-]+/`).  Specifically, whitespace in the
+component arguments is not currently suppported.
 
-```hbs
-{{#if content}}
-  {{what-bars-static content whitelist}}
-{{/if}}
-```
-
-If you want to tinker with the `compile` function itself, it is available too:
-
-```js
-import Ember from 'ember';
-import compile from 'ember-whatbars/utils/compile';
-
-const content = Ember.String.htmlSafe("<p>{{weather-component 'MI'}}</p>" +
-                                      "<p>{{carousel-component}}</p>");
-const whitelist = ['weather-component', 'carousel-component'];
-
-export default Ember.Component.extend({
-  layout: compile(content, whitelist),
-});
-```
-
-Currently, WhatBars will only render inline components whose `{{tag}}`
-makes up the entire innerHTML of a `<tag>` in the `Ember.SafeString` content.
-Also, the arguments to a component may only contain a limited set of
-characters (matching `/[\w\d\_\-]+/`).
+This addon used to rely on implementation details of Glimmer 1 templates.
+Now it is written at a higher level so that it works with Glimmer 2 as well.
 
 Note that this addon is under development and its interface may still change
-drastically.  For example, keyword parameters are currently supported but
-will be removed soon to remove the risk of users causing errors by providing
-the same parameter multiple times.  This will also relieve the developer of
-the burden of remembering to declare non-public properties as `readOnly()`.
+drastically.
 
 ## Installation
 
@@ -169,11 +169,11 @@ the burden of remembering to declare non-public properties as `readOnly()`.
 ## Running
 
 * `ember serve`
-* Visit your app at http://localhost:4200.
+* Visit your app at [http://localhost:4200](http://localhost:4200).
 
 ## Running Tests
 
-* `npm test` (Runs `ember try:testall` to test your addon against multiple Ember versions)
+* `npm test` (Runs `ember try:each` to test your addon against multiple Ember versions)
 * `ember test`
 * `ember test --server`
 

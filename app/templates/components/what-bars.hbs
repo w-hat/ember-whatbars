@@ -1,2 +1,9 @@
-{{component one content=content whitelist=whitelist tagName=''}}
-{{component two content=content whitelist=whitelist tagName=''}}
+{{#each pieces as |piece|}}
+  {{#if piece.component}}
+    {{component piece.component params=piece.params positional=piece.positional}}
+  {{else}}
+    {{what-html piece sanitizer}}
+  {{/if}}
+{{else}}
+  <!-- whatbars default -->
+{{/each}}
