@@ -2,7 +2,7 @@
   {{#if piece.component}}
     {{component piece.component params=piece.params positional=piece.positional}}
   {{else}}
-    {{what-html piece sanitizer}}
+    {{what-html piece.string sanitizer}}
   {{/if}}
 {{else}}
   <!-- whatbars default -->

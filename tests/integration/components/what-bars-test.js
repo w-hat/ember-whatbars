@@ -21,14 +21,6 @@ test('it should render an HTML comment by default', function(assert) {
   assert.equal(this.$().html().match('<!-- whatbars default -->').length, 1);
 });
 
-test('it should render a component with an argument', function(assert) {
-  this.set('content', `{{dummy-component 'police'}}`);
-  this.set('enabled', {'dummy-component': true});
-  this.render(hbs`{{what-bars content=content enabled=enabled}}`);
-  const result = 'Buffalo buffalo buffalo, and police police police.';
-  assert.equal(this.$().text().trim(), result);
-});
-
 test('it should render a component in an enabled list.', function(assert) {
   this.set('content', `{{dummy-component}}`);
   this.set('enabled', ['dummy-component']);
@@ -37,12 +29,20 @@ test('it should render a component in an enabled list.', function(assert) {
   assert.equal(this.$().text().trim(), result);
 });
 
-test('it should only render components that are enabled', function(assert) {
-  this.set('content', `{{dummy-component}}`);
+test('it should render a component with an argument', function(assert) {
+  this.set('content', `{{dummy-component 'police'}}`);
+  this.set('enabled', {'dummy-component': true});
+  this.render(hbs`{{what-bars content=content enabled=enabled}}`);
+  const result = 'Buffalo buffalo buffalo, and police police police.';
+  assert.equal(this.$().text().trim(), result);
+});
+
+test('it should only render components in the enabled object', function(assert) {
+  this.set('content', `{{dummy-component 'dot'}}`);
   this.set('enabled', {});
   this.set('sanitizer', function(s) { return Ember.String.htmlSafe(s); });
   this.render(hbs`{{what-bars content enabled=enabled sanitizer=sanitizer}}`);
-  assert.equal(this.$().text().trim(), '{{dummy-component}}');
+  assert.equal(this.$().text().trim(), `{{dummy-component 'dot'}}`);
 });
 
 test('it should rerender when content changes', function(assert) {

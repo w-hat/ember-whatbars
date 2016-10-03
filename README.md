@@ -1,5 +1,7 @@
 # Ember-whatbars
 
+[![Build Status](https://travis-ci.org/w-hat/ember-whatbars.svg?branch=master)](https://travis-ci.org/w-hat/ember-whatbars)
+
 This addon renders Ember components embedded in mutable text content with an
 HTMLBars-like syntax.  The primary use case is to provide an Ember-enabled
 markup language to untrusted users.
@@ -37,7 +39,8 @@ Markdown. These methods are employeed right here in this `README.md`.
 Sanitizers and markup languages such as Markdown often limit our users more
 than we want.  We can use plugins to add some functionality. For example,
 [markdown-it-video](https://github.com/brianjgeiger/markdown-it-video)
-provides a syntax for videos from popular sites.  Integrating a `markdown-it`
+provides a syntax for videos from popular sites.  Integrating a
+[markdown-it](https://github.com/markdown-it/markdown-it)
 plugin with Ember (Data) may prove to be difficult, though.
 
 If we trust our user content, we could run the
