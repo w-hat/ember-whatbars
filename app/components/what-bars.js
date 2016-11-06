@@ -32,7 +32,7 @@ export default Ember.Component.extend({
         let component = parts && parts[1];
         let params = [];
         let positional = [];
-        if (includes(enabled, component)) {
+        if (enabled && includes(enabled, component)) {
           for (let argsm; argsm = params_re.exec(parts[2]); ) {
             if (argsm[2]) {
 		          params[argsm[1]] = argsm[2];
