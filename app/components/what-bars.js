@@ -2,8 +2,8 @@ import Ember from 'ember';
 
 // https://xkcd.com/1171
 const pieces_re = /(\{\{[^\}\n]*\}\})/;
-const parts_re  = /^\{\{([\w\-]+)([\w\d\-\_\"\'\s\=]*)\}\}$/;
-const params_re = /([\w\d\-\_]+)(?:=[\'\"]?([\w\d\-\_]+)[\'\"]?)?/g;
+const parts_re  = /\{\{([\w\-]+)([\w\d\-\_\"\'\s\=\:\/\.\?]*)\}\}/;
+const params_re = /([\w\d\-\_]+)(?:=[\'\"]?([\w\d\-\_\/\:\.\?\=\ ]+)[\'\"]?)?/g;
 
 // TODO Support quoted whitespace.
 // TODO Support blocks.
@@ -25,10 +25,13 @@ export default Ember.Component.extend({
     const enabled = this.get('enabled');
     const strings = content.split(pieces_re);
     pieces.length = strings.length;
+
     for (let i = 0; i < strings.length; i++) {
       const string = strings[i];
+
       if (!(pieces[i] && (pieces[i].string == string))) {
         const parts = string.match(parts_re);
+
         let component = parts && parts[1];
         let params = [];
         let positional = [];
@@ -49,4 +52,3 @@ export default Ember.Component.extend({
     return pieces;
   }),
 }).reopenClass({ positionalParams: ['content', 'enabled', 'sanitizer'] });
-
