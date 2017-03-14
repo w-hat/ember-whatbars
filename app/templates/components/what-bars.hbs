@@ -1,6 +1,6 @@
 {{#each pieces as |piece|}}
   {{#if piece.component}}
-    {{component piece.component params=piece.params positional=piece.positional}}
+    {{component piece.component positional=piece.positional params=piece.params block=piece.block}}
   {{else}}
     {{what-html piece.string sanitizer}}
   {{/if}}

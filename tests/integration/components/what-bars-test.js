@@ -83,3 +83,18 @@ test('it should render multiple components and sanitize', function(assert) {
     Buffalo buffalo buffalo, and fish fish fish.`);
 });
 
+test('it should support block text in the content', function(assert) {
+  this.set('content', `A quote:
+  {{#block-quote author="Abraham Lincoln"}}
+  You can't believe everything you read on the internet.
+  {{/block-quote}}`);
+  this.set('enabled', {'block-quote': true});
+  this.set('sanitizer', function(s) {
+    return Ember.String.htmlSafe(s);
+  });
+  this.render(hbs`{{what-bars content enabled sanitizer}}`);
+  assert.equal(this.$().text().replace(/\n\s*/g, '\n    ').trim(), `A quote:
+    You can't believe everything you read on the internet.
+    — Abraham Lincoln`);
+});
+

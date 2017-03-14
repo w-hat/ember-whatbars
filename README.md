@@ -16,8 +16,6 @@ Donald Trump and raccoons both
  * look like thieves.
 
 {{youtube-video v='bQueaSlvjCw'}}
-
-Do not vote for him because he is an embarrassment.
 ```
 
 WhatBars allows safely rendering this content along with the Ember component:
@@ -125,8 +123,9 @@ function makeShinyAndSafe(str) {
 }
 ```
 
-The named arguments are provided to the component as `params` and the
-positional arguments are provided as `positional`.
+The named arguments are provided to the component as `params`,
+the positional arguments are provided as `positional`, and
+the block content is provided as `block`.
 (This could change when Ember gets
 [splat](https://github.com/wycats/handlebars.js/pull/1149).)
 A possible implementation of the `youtube-video` component is:
@@ -138,6 +137,7 @@ export default Ember.Component.extend({
   classNames: ['youtube-video'],
   params: {},
   positional: [],
+  block: '',
   v: Ember.computed('params', 'positional', function() {
     return this.get('params').v || this.get('positional')[0];
   }),
@@ -150,17 +150,8 @@ And the corresponding template might be:
 <iframe src="https://www.youtube.com/embed/{{v}}" frameborder="0"></iframe>
 ```
 
-### Other Details
+This addon is under development and its interface may still change.
 
-Currently, the arguments to a component may only contain a limited set of
-characters (matching `/[\w\d\_\-]+/`).  Specifically, whitespace in the
-component arguments is not currently suppported.
-
-This addon used to rely on implementation details of Glimmer 1 templates.
-Now it is written at a higher level so that it works with Glimmer 2 as well.
-
-Note that this addon is under development and its interface may still change
-drastically.
 
 ## Installation
 
